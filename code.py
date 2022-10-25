@@ -78,10 +78,11 @@ keyboard.diode_orientation = DiodeOrientation.ROW2COL
 # keyboard.modules.append(DebugKeys())
 
 modtap = ModTap()
-modtap.tap_time = 200
+modtap.tap_time = 120
 keyboard.modules.append(modtap)
 
 layers = Layers()
+layers.tap_time = 120
 keyboard.modules.append(layers)
 
 keyboard.coord_mapping = [
