@@ -11,6 +11,21 @@ from kmk.scanners import DiodeOrientation
 from kmk.modules.modtap import ModTap
 from kmk.modules.layers import Layers
 
+import board
+import displayio
+import busio
+import framebufferio
+import sharpdisplay
+
+displayio.release_displays()
+
+bus = busio.SPI(board.P0_08, board.P0_17, None)
+cs = board.P0_06
+
+framebuffer = sharpdisplay.SharpMemoryFramebuffer(bus, cs, width=144, height=168, baudrate=8000000)
+
+display = framebufferio.FramebufferDisplay(framebuffer)
+
 class DebugKeys(Module):
     def __init__(self):
         super().__init__()
@@ -75,14 +90,16 @@ keyboard.row_pins = [
 
 keyboard.diode_orientation = DiodeOrientation.ROW2COL
 
-# keyboard.modules.append(DebugKeys())
+keyboard.modules.append(DebugKeys())
 
 modtap = ModTap()
-modtap.tap_time = 120
+modtap.tap_time = 200
 keyboard.modules.append(modtap)
 
 layers = Layers()
-layers.tap_time = 120
+modtap.prefer_hold = False
+modtap.tap_interrupted = True
+layers.tap_time = 200
 keyboard.modules.append(layers)
 
 keyboard.coord_mapping = [
@@ -99,43 +116,69 @@ NAV = 3
 RFN = 4
 LFN = 5
 
+HRM = {
+    'prefer_hold': False,
+    'tap_interrupted': True,
+    'tap_time': 200,
+}
+
+MT_Z_LCTRL = KC.MT(KC.Z, KC.LCTRL, **HRM)
+MT_X_LSHIFT = KC.MT(KC.X, KC.LSHIFT, **HRM)
+MT_C_LALT = KC.MT(KC.C, KC.LALT, **HRM)
+MT_V_LCMD = KC.MT(KC.V, KC.LCMD, **HRM)
+
+MT_M_LCMD = KC.MT(KC.M, KC.LCMD, **HRM)
+MT_COMMA_LALT = KC.MT(KC.COMMA, KC.LALT, **HRM)
+MT_DOT_LSHIFT = KC.MT(KC.DOT, KC.LSHIFT, **HRM)
+MT_SLASH_LCTRL = KC.MT(KC.SLASH, KC.LCTRL, **HRM)
+
+LT = {
+    'prefer_hold': False,
+    'tap_interrupted': True,
+    'tap_time': 200,
+}
+
+LT_SYM_SPC = KC.LT(SYM, KC.SPACE, **LT)
+LT_NUM_SPC = KC.LT(NUM, KC.SPACE, **LT)
+LT_NAV_SPC = KC.LT(NAV, KC.SPACE, **LT)
+
 keyboard.keymap = [
     [ # ALPHA
-                                     KC.W,                   KC.E,                  KC.R,                  KC.T,                               KC.Y,                     KC.U,                   KC.I,                     KC.O,
-       KC.Q,  KC.A,                  KC.S,                   KC.D,                  KC.F,                  KC.G,                               KC.H,                     KC.J,                   KC.K,                     KC.L,                     KC.SCOLON,                 KC.P,
-              KC.MT(KC.Z, KC.LCTRL), KC.MT(KC.X, KC.LSHIFT), KC.MT(KC.C, KC.LALT),  KC.MT(KC.V, KC.LCMD),  KC.B,                               KC.N,                     KC.MT(KC.M, KC.LCMD),   KC.MT(KC.COMMA, KC.LALT), KC.MT(KC.DOT, KC.LSHIFT), KC.MT(KC.SLASH, KC.LCTRL),
-                                                                                    KC.LT(SYM, KC.SPACE),  KC.LT(NUM, KC.SPACE),               KC.LT(SYM, KC.SPACE),     KC.LT(NUM, KC.SPACE),
+                          KC.W,        KC.E,      KC.R,       KC.T,             KC.Y,       KC.U,       KC.I,            KC.O,
+       KC.Q,  KC.A,       KC.S,        KC.D,      KC.F,       KC.G,             KC.H,       KC.J,       KC.K,            KC.L,          KC.SCOLON,     KC.P,
+              MT_Z_LCTRL, MT_X_LSHIFT, MT_C_LALT, MT_V_LCMD,  KC.B,             KC.N,       MT_M_LCMD,  MT_COMMA_LALT,   MT_DOT_LSHIFT, MT_SLASH_LCTRL,
+                                                  LT_SYM_SPC, LT_NUM_SPC,       LT_SYM_SPC, LT_NUM_SPC,
     ],
 
     [ # SYM
-                          KC.AT,    KC.HASH,   KC.DOLLAR,            KC.PERC,                          KC.CIRCUMFLEX,        KC.AMPR,                KC.ASTR, KC.UNDS, 
-        KC.ESC, KC.TAB,   KC.MINUS, KC.EQUAL,  KC.EXLM,              KC.COLON,                         KC.BSLASH,            KC.GRAVE,               KC.LPRN, KC.RPRN, KC.ENTER, KC.BSPC,
-                KC.COMMA, KC.DOT,   KC.BSLASH, KC.QUOTE,             KC.GRAVE,                         KC.PIPE,              KC.LBRC,                KC.RBRC, KC.LCBR, KC.RCBR,
-                                               KC.LT(NAV, KC.SPACE), KC.LT(NAV, KC.SPACE),             KC.LT(SYM, KC.SPACE), KC.LT(NAV, KC.SPACE),
+                          KC.AT,    KC.HASH,   KC.DOLLAR,  KC.PERC,             KC.CIRCUMFLEX, KC.AMPR,    KC.ASTR, KC.UNDS, 
+        KC.ESC, KC.TAB,   KC.MINUS, KC.EQUAL,  KC.EXLM,    KC.COLON,            KC.BSLASH,     KC.GRAVE,   KC.LPRN, KC.RPRN, KC.ENTER, KC.BSPC,
+                KC.COMMA, KC.DOT,   KC.BSLASH, KC.QUOTE,   KC.GRAVE,            KC.PIPE,       KC.LBRC,    KC.RBRC, KC.LCBR, KC.RCBR,
+                                               LT_NAV_SPC, LT_NAV_SPC,          LT_NAV_SPC,    LT_NAV_SPC,
    ],
 
     # NUM
     [
-                          KC.LPRN,  KC.LCBR, KC.LBRC,              KC.NO,                            KC.EQL,               KC.N7,                KC.N8,       KC.N9,
-        KC.ESC, KC.TAB,   KC.UNDS,  KC.PLUS, KC.RPRN,              KC.COLON,                         KC.MINUS,             KC.N4,                KC.N5,       KC.N6,    KC.ENT, KC.BSPC,
-                KC.LABK,  KC.RABK,  KC.BSLS, KC.DQUO,              KC.TILDE,                         KC.N0,                KC.N1,                KC.N2,       KC.N3,    KC.QUES,
-                                             KC.LT(NAV, KC.SPACE), KC.LT(NAV, KC.SPACE),             KC.LT(NAV, KC.SPACE), KC.LT(NAV, KC.SPACE),
+                          KC.LPRN,  KC.LCBR, KC.LBRC,    KC.NO,                 KC.EQL,     KC.N7,      KC.N8, KC.N9,
+        KC.ESC, KC.TAB,   KC.UNDS,  KC.PLUS, KC.RPRN,    KC.COLON,              KC.MINUS,   KC.N4,      KC.N5, KC.N6, KC.ENT,  KC.BSPC,
+                KC.LABK,  KC.RABK,  KC.BSLS, KC.DQUO,    KC.TILDE,              KC.N0,      KC.N1,      KC.N2, KC.N3, KC.QUES,
+                                             LT_NAV_SPC, LT_NAV_SPC,            LT_NAV_SPC, LT_NAV_SPC,
     ],
 
     # NAV
     [
-                                   KC.NO  ,  KC.NO  , KC.NO  ,    KC.BLE_REFRESH,             KC.HOME,    KC.NO,            KC.NO,       KC.NO,    
-        KC.ESC, KC.TAB,            KC.NO  ,  KC.NO  , KC.NO  ,    KC.NO  ,                    KC.LEFT,    KC.DOWN,          KC.UP,       KC.RIGHT, KC.ENTER,   KC.BSPC,
-                KC.MO(RFN),        KC.NO  ,  KC.NO  , KC.NO  ,    KC.NO,                      KC.NO,      KC.PGDN,          KC.PGUP,     KC.END,   KC.MO(LFN),
-                                                      KC.SPACE  , KC.SPACE,                   KC.SPACE,   KC.SPACE,
+                            KC.NO,  KC.NO, KC.NO,    KC.BLE_REFRESH,            KC.HOME,  KC.NO,    KC.NO,   KC.NO,    
+        KC.ESC, KC.TAB,     KC.NO,  KC.NO, KC.NO,    KC.NO,                     KC.LEFT,  KC.DOWN,  KC.UP,   KC.RIGHT, KC.ENTER,   KC.BSPC,
+                KC.MO(RFN), KC.NO,  KC.NO, KC.NO,    KC.NO,                     KC.NO,    KC.PGDN,  KC.PGUP, KC.END,   KC.MO(LFN),
+                                           KC.SPACE, KC.SPACE,                  KC.SPACE, KC.SPACE,
     ],
 
     # RFN
     [
-                                   KC.NO  ,  KC.NO  , KC.NO  ,  KC.BLE_REFRESH,             KC.HOME,    KC.NO,            KC.NO,       KC.NO,
-        KC.ESC, KC.TAB,            KC.NO  ,  KC.NO  , KC.NO  ,  KC.NO  ,                    KC.LEFT,    KC.DOWN,          KC.UP,       KC.RIGHT, KC.ENTER, KC.BSPC,
-                KC.MO(RFN),        KC.NO  ,  KC.NO  , KC.NO  ,  KC.NO,                      KC.NO,      KC.PGDN,          KC.PGUP,     KC.END,   KC.MO(LFN),
-                                                      KC.SPACE, KC.SPACE,                   KC.SPACE,   KC.SPACE,
+                            KC.NO,  KC.NO, KC.NO,    KC.BLE_REFRESH,            KC.HOME,    KC.NO,            KC.NO,       KC.NO,
+        KC.ESC, KC.TAB,     KC.NO,  KC.NO, KC.NO,    KC.NO,                     KC.LEFT,    KC.DOWN,          KC.UP,       KC.RIGHT, KC.ENTER, KC.BSPC,
+                KC.MO(RFN), KC.NO,  KC.NO, KC.NO,    KC.NO,                     KC.NO,      KC.PGDN,          KC.PGUP,     KC.END,   KC.MO(LFN),
+                                           KC.SPACE, KC.SPACE,                  KC.SPACE,   KC.SPACE,
     ],
     # [
     #     KC.NO,  KC.NO,  KC.NO, KC.NO, KC.NO,                             KC.F11,   KC.F7, KC.F8, KC.F9, KC.NO,
@@ -146,10 +189,10 @@ keyboard.keymap = [
 
     # LFN
     [
-                                   KC.NO  ,  KC.NO  , KC.NO  ,  KC.BLE_REFRESH,             KC.HOME,    KC.NO,            KC.NO,       KC.NO,
-        KC.ESC, KC.TAB,            KC.NO  ,  KC.NO  , KC.NO  ,  KC.NO  ,                    KC.LEFT,    KC.DOWN,          KC.UP,       KC.RIGHT, KC.ENTER,   KC.BSPC,
-                KC.MO(RFN),        KC.NO  ,  KC.NO  , KC.NO  ,  KC.NO,                      KC.NO,      KC.PGDN,          KC.PGUP,     KC.END,   KC.MO(LFN),
-                                                      KC.SPACE, KC.SPACE,                   KC.SPACE,   KC.SPACE,
+                            KC.NO,  KC.NO, KC.NO,    KC.BLE_REFRESH,            KC.HOME,    KC.NO,    KC.NO,   KC.NO,
+        KC.ESC, KC.TAB,     KC.NO,  KC.NO, KC.NO,    KC.NO,                     KC.LEFT,    KC.DOWN,  KC.UP,   KC.RIGHT, KC.ENTER,   KC.BSPC,
+                KC.MO(RFN), KC.NO,  KC.NO, KC.NO,    KC.NO,                     KC.NO,      KC.PGDN,  KC.PGUP, KC.END,   KC.MO(LFN),
+                                           KC.SPACE, KC.SPACE,                  KC.SPACE,   KC.SPACE,
     ],
     # [
     #     KC.NO,  KC.F7,  KC.F8, KC.F9, KC.F11,                                      KC.NO  , KC.NO  , KC.NO  , KC.NO  , KC.NO  ,

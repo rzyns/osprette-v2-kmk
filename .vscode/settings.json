@@ -5,9 +5,11 @@
     },
     "python.languageServer": "Pylance",
     "python.analysis.extraPaths": [
-        "",
-        "/home/janusz/.vscode-server/extensions/joedevivo.vscode-circuitpython-0.1.19-linux-x64/stubs",
-        "/home/janusz/.vscode-server/data/User/globalStorage/joedevivo.vscode-circuitpython/bundle/20221025/adafruit-circuitpython-bundle-py-20221025/lib"
+        "/Users/janusz/.vscode/extensions/joedevivo.vscode-circuitpython-0.1.19-darwin-x64/boards/0x239A/0x80B4",
+        "/Users/janusz/.vscode/extensions/joedevivo.vscode-circuitpython-0.1.19-darwin-x64/stubs",
+        "/Users/janusz/Library/Application Support/Code/User/globalStorage/joedevivo.vscode-circuitpython/bundle/20221027/adafruit-circuitpython-bundle-py-20221027/lib"
     ],
-    "circuitpython.board.version": null
+    "circuitpython.board.version": "2",
+    "circuitpython.board.vid": "0x239A",
+    "circuitpython.board.pid": "0x80B4"
 }
