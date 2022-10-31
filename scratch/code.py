@@ -10,53 +10,7 @@ from kmk.scanners import DiodeOrientation
 from kmk.modules.modtap import ModTap
 from kmk.modules.layers import Layers
 
-import busio
-import digitalio
-
-import displayio
-import adafruit_sharpmemorydisplay
-
-import time
-
-display_bus = busio.SPI(board.P0_08, board.P0_17, None)
-chip_select_pin = board.P0_06
-display_scs = digitalio.DigitalInOut(chip_select_pin)
-# display = adafruit_sharpmemorydisplay.SharpMemoryDisplay(display_bus, display_scs, width=144, height=168, baudrate=8000000)
-display = adafruit_sharpmemorydisplay.SharpMemoryDisplay(display_bus, display_scs, width=160, height=68, baudrate=8000000)
-
-displayio.release_displays()
-print("Pixel test")
-
-# Clear the display.  Always call show after changing pixels to make the display
-# update visible!
-display.fill(1)
-display.show()
-time.sleep(2)
-
-# Set a pixel in the origin 0,0 position.
-display.pixel(0, 0, 0)
-# Set a pixel in the middle position.
-display.pixel(display.width // 2, display.width // 2, 0)
-# Set a pixel in the opposite corner position.
-display.pixel(display.width - 1, display.height - 1, 0)
-display.show()
-time.sleep(2)
-
-print("Lines test")
-# we'll draw from corner to corner, lets define all the pair coordinates here
-corners = (
-    (0, 0),
-    (0, display.height - 1),
-    (display.width - 1, 0),
-    (display.width - 1, display.height - 1),
-)
-
-display.fill(1)
-for corner_from in corners:
-    for corner_to in corners:
-        display.line(corner_from[0], corner_from[1], corner_to[0], corner_to[1], 0)
-display.show()
-time.sleep(2)
+import display_test
 
 class DebugKeys(Module):
     def __init__(self):

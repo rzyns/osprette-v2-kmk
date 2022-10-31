@@ -1,0 +1,6 @@
+[submodule "kmk_firmware"]
+	path = kmk_firmware
+	url = git@github.com:KMKfw/kmk_firmware.git
+[submodule "circuitpython"]
+	path = circuitpython
+	url = git@github.com:rzyns/circuitpython.git

@@ -1,4 +1,3 @@
-print('code.py running...')
 import board
 
 # from kmk.hid import HIDModes
@@ -15,16 +14,27 @@ import board
 import displayio
 import busio
 import framebufferio
+import terminalio
 import sharpdisplay
+
+import microcontroller
+from adafruit_simple_text_display import SimpleTextDisplay
 
 displayio.release_displays()
 
-bus = busio.SPI(board.P0_08, board.P0_17, None)
-cs = board.P0_06
+bus = busio.SPI(board.P1_02, board.P1_07, None)
+cs = board.P1_01
 
-framebuffer = sharpdisplay.SharpMemoryFramebuffer(bus, cs, width=144, height=168, baudrate=8000000)
+framebuffer = sharpdisplay.SharpMemoryFramebuffer(bus, cs, width=160, height=68, baudrate=8000000)
 
-display = framebufferio.FramebufferDisplay(framebuffer)
+the_display = framebufferio.FramebufferDisplay(framebuffer=framebuffer, rotation=90)
+
+temperature_data = SimpleTextDisplay(title="Temp", display=the_display, title_scale=2)
+l1 = temperature_data.add_text_line()
+l1.text = "{:.2f} C".format(microcontroller.cpu.temperature)
+l2 = temperature_data.add_text_line()
+l2.text = temperature_data[2].text = "{:.2f} F".format(microcontroller.cpu.temperature * 9 / 5 + 32)
+temperature_data.show()
 
 class DebugKeys(Module):
     def __init__(self):
@@ -90,7 +100,7 @@ keyboard.row_pins = [
 
 keyboard.diode_orientation = DiodeOrientation.ROW2COL
 
-keyboard.modules.append(DebugKeys())
+# keyboard.modules.append(DebugKeys())
 
 modtap = ModTap()
 modtap.tap_time = 200
@@ -203,6 +213,59 @@ keyboard.keymap = [
 ]
 
 # keyboard.debug_enabled = True
+
+def add_line(d: SimpleTextDisplay, text: str):
+    line = d.add_text_line()
+    line.text = text
+
+class Foo(Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.key: Key | None = None
+
+    def during_bootup(self, keyboard):
+        pass
+
+    def before_matrix_scan(self, keyboard):
+        '''
+        Return value will be injected as an extra matrix update
+        '''
+        pass
+
+    def after_matrix_scan(self, keyboard):
+        '''
+        Return value will be replace matrix update if supplied
+        '''
+        pass
+
+    def process_key(self, keyboard, key: Key, is_pressed, int_coord):
+        self.key = key
+        print("process_key(): key is ", key)
+        # return super().process_key(keyboard, key, is_pressed, int_coord)
+        return key
+
+    def before_hid_send(self, keyboard):
+        pass
+
+    def after_hid_send(self, keyboard):
+        if self.key is not None:
+            # print("after_hid_send(): key sent was ", self.key)
+
+            display = SimpleTextDisplay(title="Key", display=the_display, title_scale=2)
+            add_line(display, "" + repr(self.key.code))
+            add_line(display, "" + repr(self.key.meta))
+            display.show()
+           
+            self.key = None
+
+    def on_powersave_enable(self, keyboard):
+        pass
+
+    def on_powersave_disable(self, keyboard):
+        pass
+
+
+keyboard.modules.append(Foo())
 
 if __name__ == '__main__':
     print('keyboard.go()-ing')
